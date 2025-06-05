@@ -63,7 +63,7 @@ export class MemStorage implements IStorage {
     this.initializeSampleData();
   }
 
-  private async initializeSampleData() {
+  private initializeSampleData() {
     // Sample spice products
     const spiceProductsData = [
       {
