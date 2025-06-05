@@ -25,7 +25,7 @@ export default function Header() {
               <Globe className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="text-xl font-bold text-gray-900">Emirates Trade Hub</span>
+              <span className="text-xl font-bold text-gray-900">Hill Tribe FZ LLC</span>
               <div className="text-xs text-gray-500">UAE International Business</div>
             </div>
           </Link>

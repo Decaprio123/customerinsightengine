@@ -104,9 +104,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    for (const product of spiceProductsData) {
-      await this.createSpiceProduct(product);
-    }
+    spiceProductsData.forEach(product => {
+      this.createSpiceProduct(product);
+    });
 
     // Sample travel packages
     const travelPackagesData = [
@@ -142,9 +142,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    for (const pkg of travelPackagesData) {
-      await this.createTravelPackage(pkg);
-    }
+    travelPackagesData.forEach(travelPkg => {
+      this.createTravelPackage(travelPkg);
+    });
 
     // Sample business services
     const businessServicesData = [
@@ -182,9 +182,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    for (const service of businessServicesData) {
-      await this.createBusinessService(service);
-    }
+    businessServicesData.forEach(service => {
+      this.createBusinessService(service);
+    });
   }
 
   // Inquiry methods
@@ -258,7 +258,7 @@ export class MemStorage implements IStorage {
   }
 
   // Travel packages methods
-  async createTravelPackage(insertPackage: InsertTravelPackage): Promise<TravelPackage> {
+  createTravelPackage(insertPackage: InsertTravelPackage): TravelPackage {
     const id = this.currentTravelPackageId++;
     const travelPackage: TravelPackage = {
       ...insertPackage,
@@ -269,6 +269,10 @@ export class MemStorage implements IStorage {
     };
     this.travelPackages.set(id, travelPackage);
     return travelPackage;
+  }
+
+  async createTravelPackageAsync(insertPackage: InsertTravelPackage): Promise<TravelPackage> {
+    return Promise.resolve(this.createTravelPackage(insertPackage));
   }
 
   async getAllTravelPackages(): Promise<TravelPackage[]> {

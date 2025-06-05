@@ -63,7 +63,7 @@ export default function Homepage() {
               <span className="text-primary block">International Business</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Emirates Trade Hub LLC - Your trusted partner for premium spices and honey trade, 
+              Hill Tribe FZ LLC - Your trusted partner for premium spices and honey trade, 
               travel experiences, and business formation services in the UAE.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -195,7 +195,7 @@ export default function Homepage() {
                   <Globe className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <span className="text-xl font-bold">Emirates Trade Hub</span>
+                  <span className="text-xl font-bold">Hill Tribe FZ LLC</span>
                   <div className="text-sm text-gray-400">UAE International Business</div>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default function Homepage() {
           </div>
           
           <div className="border-t border-gray-800 pt-8 mt-8 text-center text-gray-400">
-            <p>&copy; 2024 Emirates Trade Hub LLC. All rights reserved.</p>
+            <p>&copy; 2024 Hill Tribe FZ LLC. All rights reserved.</p>
           </div>
         </div>
       </footer>
