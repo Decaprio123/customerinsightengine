@@ -12,7 +12,7 @@ export default function Homepage() {
       icon: Package,
       href: "/spices",
       features: ["Direct farm sourcing", "Premium quality guaranteed", "International shipping", "Bulk orders available"],
-      gradient: "from-green-500 to-emerald-600"
+      gradient: "from-yellow-400 to-yellow-600"
     },
     {
       title: "Travel & Tourism",
@@ -55,25 +55,25 @@ export default function Homepage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-white">
+      <section className="bg-gradient-to-r from-black via-gray-900 to-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Your Gateway to
-              <span className="text-primary block">International Business</span>
+              <span className="text-yellow-400 block">International Business</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Hill Tribe FZ LLC - Your trusted partner for premium spices and honey trade, 
               travel experiences, and business formation services in the UAE.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button size="lg" className="px-8 py-3">
+                <Button size="lg" className="px-8 py-3 bg-yellow-400 text-black hover:bg-yellow-500">
                   Get Started Today
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="px-8 py-3">
+              <Button variant="outline" size="lg" className="px-8 py-3 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black">
                 Learn More
               </Button>
             </div>
