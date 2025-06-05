@@ -1,185 +1,329 @@
-import { feedback, customers, sentimentStats, users, type Feedback, type InsertFeedback, type Customer, type InsertCustomer, type SentimentStats, type User, type InsertUser } from "@shared/schema";
+import { 
+  inquiries, 
+  spiceProducts, 
+  travelPackages, 
+  businessServices,
+  type Inquiry, 
+  type InsertInquiry, 
+  type SpiceProduct, 
+  type InsertSpiceProduct,
+  type TravelPackage,
+  type InsertTravelPackage,
+  type BusinessService,
+  type InsertBusinessService
+} from "@shared/schema";
 
 export interface IStorage {
-  // User methods (existing)
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Inquiry methods
+  createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
+  getAllInquiries(): Promise<Inquiry[]>;
+  getInquiriesByBusinessType(businessType: string): Promise<Inquiry[]>;
+  updateInquiryStatus(id: number, status: string): Promise<Inquiry | undefined>;
   
-  // Feedback methods
-  createFeedback(feedback: InsertFeedback & { sentiment: string; confidence: number; rating?: number }): Promise<Feedback>;
-  getAllFeedback(): Promise<Feedback[]>;
-  getFeedbackById(id: number): Promise<Feedback | undefined>;
-  updateFeedbackResponse(id: number, isResponded: boolean): Promise<Feedback | undefined>;
-  getFeedbackByDateRange(startDate: Date, endDate: Date): Promise<Feedback[]>;
+  // Spice products methods
+  createSpiceProduct(product: InsertSpiceProduct): Promise<SpiceProduct>;
+  getAllSpiceProducts(): Promise<SpiceProduct[]>;
+  getSpiceProductsByCategory(category: string): Promise<SpiceProduct[]>;
+  updateSpiceProduct(id: number, updates: Partial<InsertSpiceProduct>): Promise<SpiceProduct | undefined>;
   
-  // Customer methods
-  createCustomer(customer: InsertCustomer): Promise<Customer>;
-  getCustomerByEmail(email: string): Promise<Customer | undefined>;
-  updateCustomerStats(email: string): Promise<void>;
+  // Travel packages methods
+  createTravelPackage(package: InsertTravelPackage): Promise<TravelPackage>;
+  getAllTravelPackages(): Promise<TravelPackage[]>;
+  getActiveTravelPackages(): Promise<TravelPackage[]>;
+  updateTravelPackage(id: number, updates: Partial<InsertTravelPackage>): Promise<TravelPackage | undefined>;
   
-  // Analytics methods
-  getSentimentStats(): Promise<{ positive: number; negative: number; neutral: number; total: number }>;
-  getSentimentTrends(days: number): Promise<Array<{ date: string; positive: number; negative: number; neutral: number }>>;
-  getResponseStats(): Promise<{ responseRate: number; avgResponseTime: number }>;
+  // Business services methods
+  createBusinessService(service: InsertBusinessService): Promise<BusinessService>;
+  getAllBusinessServices(): Promise<BusinessService[]>;
+  getPopularBusinessServices(): Promise<BusinessService[]>;
+  updateBusinessService(id: number, updates: Partial<InsertBusinessService>): Promise<BusinessService | undefined>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private feedbackItems: Map<number, Feedback>;
-  private customerItems: Map<number, Customer>;
-  private stats: Map<string, SentimentStats>;
-  private currentUserId: number;
-  private currentFeedbackId: number;
-  private currentCustomerId: number;
+  private inquiries: Map<number, Inquiry>;
+  private spiceProducts: Map<number, SpiceProduct>;
+  private travelPackages: Map<number, TravelPackage>;
+  private businessServices: Map<number, BusinessService>;
+  private currentInquiryId: number;
+  private currentSpiceProductId: number;
+  private currentTravelPackageId: number;
+  private currentBusinessServiceId: number;
 
   constructor() {
-    this.users = new Map();
-    this.feedbackItems = new Map();
-    this.customerItems = new Map();
-    this.stats = new Map();
-    this.currentUserId = 1;
-    this.currentFeedbackId = 1;
-    this.currentCustomerId = 1;
+    this.inquiries = new Map();
+    this.spiceProducts = new Map();
+    this.travelPackages = new Map();
+    this.businessServices = new Map();
+    this.currentInquiryId = 1;
+    this.currentSpiceProductId = 1;
+    this.currentTravelPackageId = 1;
+    this.currentBusinessServiceId = 1;
+    
+    // Initialize with sample data
+    this.initializeSampleData();
   }
 
-  // User methods (existing)
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  private async initializeSampleData() {
+    // Sample spice products
+    const spiceProductsData = [
+      {
+        name: "Premium Black Cardamom",
+        category: "spices",
+        origin: "Kerala, India",
+        description: "Aromatic black cardamom with intense smoky flavor, perfect for biryanis and meat dishes.",
+        priceRange: "AED 45-65 per kg",
+        isAvailable: true,
+        imageUrl: "/api/placeholder/300/200"
+      },
+      {
+        name: "Malabar Black Pepper",
+        category: "spices",
+        origin: "Kerala, India",
+        description: "Premium quality black pepper with high piperine content and bold flavor.",
+        priceRange: "AED 85-120 per kg",
+        isAvailable: true,
+        imageUrl: "/api/placeholder/300/200"
+      },
+      {
+        name: "Madagascar Cloves",
+        category: "spices",
+        origin: "Madagascar",
+        description: "High-quality whole cloves with strong aroma and authentic flavor.",
+        priceRange: "AED 95-140 per kg",
+        isAvailable: true,
+        imageUrl: "/api/placeholder/300/200"
+      },
+      {
+        name: "Wild Forest Honey",
+        category: "honey",
+        origin: "Himalayas, India",
+        description: "Pure, unprocessed wild honey sourced from Himalayan forests.",
+        priceRange: "AED 35-50 per kg",
+        isAvailable: true,
+        imageUrl: "/api/placeholder/300/200"
+      }
+    ];
+
+    for (const product of spiceProductsData) {
+      await this.createSpiceProduct(product);
+    }
+
+    // Sample travel packages
+    const travelPackagesData = [
+      {
+        title: "Dubai Heritage & Modern Tour",
+        destination: "Dubai, UAE",
+        duration: "4 Days / 3 Nights",
+        price: "AED 1,850 per person",
+        description: "Experience the perfect blend of traditional and modern Dubai with visits to heritage sites and iconic landmarks.",
+        includes: ["Airport transfers", "Hotel accommodation", "City tour", "Desert safari", "Dhow cruise"],
+        imageUrl: "/api/placeholder/400/250",
+        isActive: true
+      },
+      {
+        title: "Abu Dhabi Cultural Experience",
+        destination: "Abu Dhabi, UAE",
+        duration: "3 Days / 2 Nights",
+        price: "AED 1,450 per person",
+        description: "Discover the cultural heart of UAE with visits to Sheikh Zayed Mosque, Louvre Abu Dhabi, and traditional markets.",
+        includes: ["Hotel stay", "Cultural tours", "Museum entries", "Traditional meals"],
+        imageUrl: "/api/placeholder/400/250",
+        isActive: true
+      },
+      {
+        title: "Kerala Spice Trail",
+        destination: "Kerala, India",
+        duration: "7 Days / 6 Nights",
+        price: "AED 2,850 per person",
+        description: "Explore spice plantations, backwaters, and traditional Kerala culture.",
+        includes: ["Flights", "Accommodation", "Spice plantation tours", "Backwater cruise", "Ayurvedic treatments"],
+        imageUrl: "/api/placeholder/400/250",
+        isActive: true
+      }
+    ];
+
+    for (const pkg of travelPackagesData) {
+      await this.createTravelPackage(pkg);
+    }
+
+    // Sample business services
+    const businessServicesData = [
+      {
+        serviceName: "UAE Business Setup - LLC Formation",
+        description: "Complete LLC company formation in UAE with all legal documentation and approvals.",
+        price: "AED 12,500",
+        duration: "7-14 business days",
+        features: ["Trade license", "MOA preparation", "Bank account assistance", "Visa processing", "Office setup guidance"],
+        isPopular: true
+      },
+      {
+        serviceName: "Free Zone Company Setup",
+        description: "Establish your business in UAE free zones with 100% foreign ownership.",
+        price: "AED 15,000",
+        duration: "5-10 business days",
+        features: ["Free zone license", "Office space", "Visa allocation", "Banking support", "Legal compliance"],
+        isPopular: true
+      },
+      {
+        serviceName: "Business Consultation Package",
+        description: "Complete business planning and market entry strategy for UAE market.",
+        price: "AED 2,500",
+        duration: "2-3 weeks",
+        features: ["Market analysis", "Business plan", "Legal structure advice", "Financial planning", "Ongoing support"],
+        isPopular: false
+      },
+      {
+        serviceName: "Import/Export License",
+        description: "Obtain import/export licenses for international trade operations.",
+        price: "AED 8,000",
+        duration: "10-15 business days",
+        features: ["Trade license amendment", "Customs registration", "Chamber membership", "Documentation support"],
+        isPopular: false
+      }
+    ];
+
+    for (const service of businessServicesData) {
+      await this.createBusinessService(service);
+    }
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
-
-  // Feedback methods
-  async createFeedback(insertFeedback: InsertFeedback & { sentiment: string; confidence: number; rating?: number }): Promise<Feedback> {
-    const id = this.currentFeedbackId++;
-    const feedbackItem: Feedback = { 
-      ...insertFeedback, 
+  // Inquiry methods
+  async createInquiry(insertInquiry: InsertInquiry): Promise<Inquiry> {
+    const id = this.currentInquiryId++;
+    const inquiry: Inquiry = {
+      ...insertInquiry,
       id,
-      isResponded: false,
+      phone: insertInquiry.phone || null,
+      status: "new",
       createdAt: new Date()
     };
-    this.feedbackItems.set(id, feedbackItem);
-    return feedbackItem;
+    this.inquiries.set(id, inquiry);
+    return inquiry;
   }
 
-  async getAllFeedback(): Promise<Feedback[]> {
-    return Array.from(this.feedbackItems.values()).sort((a, b) => 
+  async getAllInquiries(): Promise<Inquiry[]> {
+    return Array.from(this.inquiries.values()).sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
-  async getFeedbackById(id: number): Promise<Feedback | undefined> {
-    return this.feedbackItems.get(id);
+  async getInquiriesByBusinessType(businessType: string): Promise<Inquiry[]> {
+    return Array.from(this.inquiries.values()).filter(
+      inquiry => inquiry.businessType === businessType
+    );
   }
 
-  async updateFeedbackResponse(id: number, isResponded: boolean): Promise<Feedback | undefined> {
-    const feedbackItem = this.feedbackItems.get(id);
-    if (feedbackItem) {
-      feedbackItem.isResponded = isResponded;
-      this.feedbackItems.set(id, feedbackItem);
-      return feedbackItem;
+  async updateInquiryStatus(id: number, status: string): Promise<Inquiry | undefined> {
+    const inquiry = this.inquiries.get(id);
+    if (inquiry) {
+      inquiry.status = status;
+      this.inquiries.set(id, inquiry);
+      return inquiry;
     }
     return undefined;
   }
 
-  async getFeedbackByDateRange(startDate: Date, endDate: Date): Promise<Feedback[]> {
-    return Array.from(this.feedbackItems.values()).filter(item => {
-      const itemDate = new Date(item.createdAt);
-      return itemDate >= startDate && itemDate <= endDate;
-    });
-  }
-
-  // Customer methods
-  async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
-    const id = this.currentCustomerId++;
-    const customer: Customer = { 
-      ...insertCustomer, 
+  // Spice products methods
+  async createSpiceProduct(insertProduct: InsertSpiceProduct): Promise<SpiceProduct> {
+    const id = this.currentSpiceProductId++;
+    const product: SpiceProduct = {
+      ...insertProduct,
       id,
-      totalFeedback: 0,
-      lastFeedbackAt: null,
-      createdAt: new Date()
+      priceRange: insertProduct.priceRange || null,
+      isAvailable: insertProduct.isAvailable ?? true,
+      imageUrl: insertProduct.imageUrl || null
     };
-    this.customerItems.set(id, customer);
-    return customer;
+    this.spiceProducts.set(id, product);
+    return product;
   }
 
-  async getCustomerByEmail(email: string): Promise<Customer | undefined> {
-    return Array.from(this.customerItems.values()).find(
-      (customer) => customer.email === email,
+  async getAllSpiceProducts(): Promise<SpiceProduct[]> {
+    return Array.from(this.spiceProducts.values());
+  }
+
+  async getSpiceProductsByCategory(category: string): Promise<SpiceProduct[]> {
+    return Array.from(this.spiceProducts.values()).filter(
+      product => product.category === category && product.isAvailable
     );
   }
 
-  async updateCustomerStats(email: string): Promise<void> {
-    const customer = await this.getCustomerByEmail(email);
-    if (customer) {
-      const feedbackCount = Array.from(this.feedbackItems.values()).filter(
-        item => item.customerEmail === email
-      ).length;
-      customer.totalFeedback = feedbackCount;
-      customer.lastFeedbackAt = new Date();
-      this.customerItems.set(customer.id, customer);
+  async updateSpiceProduct(id: number, updates: Partial<InsertSpiceProduct>): Promise<SpiceProduct | undefined> {
+    const product = this.spiceProducts.get(id);
+    if (product) {
+      Object.assign(product, updates);
+      this.spiceProducts.set(id, product);
+      return product;
     }
+    return undefined;
   }
 
-  // Analytics methods
-  async getSentimentStats(): Promise<{ positive: number; negative: number; neutral: number; total: number }> {
-    const allFeedback = Array.from(this.feedbackItems.values());
-    const positive = allFeedback.filter(item => item.sentiment === 'positive').length;
-    const negative = allFeedback.filter(item => item.sentiment === 'negative').length;
-    const neutral = allFeedback.filter(item => item.sentiment === 'neutral').length;
-    const total = allFeedback.length;
-
-    return { positive, negative, neutral, total };
+  // Travel packages methods
+  async createTravelPackage(insertPackage: InsertTravelPackage): Promise<TravelPackage> {
+    const id = this.currentTravelPackageId++;
+    const travelPackage: TravelPackage = {
+      ...insertPackage,
+      id,
+      includes: insertPackage.includes || null,
+      imageUrl: insertPackage.imageUrl || null,
+      isActive: insertPackage.isActive ?? true
+    };
+    this.travelPackages.set(id, travelPackage);
+    return travelPackage;
   }
 
-  async getSentimentTrends(days: number): Promise<Array<{ date: string; positive: number; negative: number; neutral: number }>> {
-    const trends = [];
-    const now = new Date();
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-      
-      const nextDate = new Date(date);
-      nextDate.setDate(nextDate.getDate() + 1);
-      
-      const dayFeedback = Array.from(this.feedbackItems.values()).filter(item => {
-        const itemDate = new Date(item.createdAt);
-        return itemDate >= date && itemDate < nextDate;
-      });
-      
-      trends.push({
-        date: date.toISOString().split('T')[0],
-        positive: dayFeedback.filter(item => item.sentiment === 'positive').length,
-        negative: dayFeedback.filter(item => item.sentiment === 'negative').length,
-        neutral: dayFeedback.filter(item => item.sentiment === 'neutral').length,
-      });
+  async getAllTravelPackages(): Promise<TravelPackage[]> {
+    return Array.from(this.travelPackages.values());
+  }
+
+  async getActiveTravelPackages(): Promise<TravelPackage[]> {
+    return Array.from(this.travelPackages.values()).filter(
+      pkg => pkg.isActive
+    );
+  }
+
+  async updateTravelPackage(id: number, updates: Partial<InsertTravelPackage>): Promise<TravelPackage | undefined> {
+    const travelPackage = this.travelPackages.get(id);
+    if (travelPackage) {
+      Object.assign(travelPackage, updates);
+      this.travelPackages.set(id, travelPackage);
+      return travelPackage;
     }
-    
-    return trends;
+    return undefined;
   }
 
-  async getResponseStats(): Promise<{ responseRate: number; avgResponseTime: number }> {
-    const allFeedback = Array.from(this.feedbackItems.values());
-    const respondedFeedback = allFeedback.filter(item => item.isResponded);
-    
-    const responseRate = allFeedback.length > 0 ? (respondedFeedback.length / allFeedback.length) * 100 : 0;
-    const avgResponseTime = 2.4; // Mock average response time in hours
-    
-    return { responseRate, avgResponseTime };
+  // Business services methods
+  async createBusinessService(insertService: InsertBusinessService): Promise<BusinessService> {
+    const id = this.currentBusinessServiceId++;
+    const service: BusinessService = {
+      ...insertService,
+      id,
+      price: insertService.price || null,
+      duration: insertService.duration || null,
+      features: insertService.features || null,
+      isPopular: insertService.isPopular ?? false
+    };
+    this.businessServices.set(id, service);
+    return service;
+  }
+
+  async getAllBusinessServices(): Promise<BusinessService[]> {
+    return Array.from(this.businessServices.values());
+  }
+
+  async getPopularBusinessServices(): Promise<BusinessService[]> {
+    return Array.from(this.businessServices.values()).filter(
+      service => service.isPopular
+    );
+  }
+
+  async updateBusinessService(id: number, updates: Partial<InsertBusinessService>): Promise<BusinessService | undefined> {
+    const service = this.businessServices.get(id);
+    if (service) {
+      Object.assign(service, updates);
+      this.businessServices.set(id, service);
+      return service;
+    }
+    return undefined;
   }
 }
 

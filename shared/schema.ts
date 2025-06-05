@@ -2,69 +2,78 @@ import { pgTable, text, serial, integer, boolean, timestamp, real } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const feedback = pgTable("feedback", {
-  id: serial("id").primaryKey(),
-  content: text("content").notNull(),
-  customerName: text("customer_name").notNull(),
-  customerEmail: text("customer_email"),
-  source: text("source").notNull(), // 'form', 'email', 'sms'
-  sentiment: text("sentiment").notNull(), // 'positive', 'negative', 'neutral'
-  confidence: real("confidence").notNull(), // 0-1 confidence score
-  rating: integer("rating"), // 1-5 stars if provided
-  isResponded: boolean("is_responded").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const customers = pgTable("customers", {
+// Contact inquiries for all business divisions
+export const inquiries = pgTable("inquiries", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").unique(),
-  totalFeedback: integer("total_feedback").default(0),
-  lastFeedbackAt: timestamp("last_feedback_at"),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  businessType: text("business_type").notNull(), // 'spices', 'travel', 'business_formation'
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").default("new"), // 'new', 'contacted', 'closed'
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const sentimentStats = pgTable("sentiment_stats", {
+// Spice trade products
+export const spiceProducts = pgTable("spice_products", {
   id: serial("id").primaryKey(),
-  date: timestamp("date").notNull(),
-  positiveCount: integer("positive_count").default(0),
-  negativeCount: integer("negative_count").default(0),
-  neutralCount: integer("neutral_count").default(0),
-  totalCount: integer("total_count").default(0),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // 'spices', 'honey'
+  origin: text("origin").notNull(),
+  description: text("description").notNull(),
+  priceRange: text("price_range"),
+  isAvailable: boolean("is_available").default(true),
+  imageUrl: text("image_url"),
 });
 
-export const insertFeedbackSchema = createInsertSchema(feedback).omit({
+// Travel packages
+export const travelPackages = pgTable("travel_packages", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  destination: text("destination").notNull(),
+  duration: text("duration").notNull(),
+  price: text("price").notNull(),
+  description: text("description").notNull(),
+  includes: text("includes").array(),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true),
+});
+
+// Business formation services
+export const businessServices = pgTable("business_services", {
+  id: serial("id").primaryKey(),
+  serviceName: text("service_name").notNull(),
+  description: text("description").notNull(),
+  price: text("price"),
+  duration: text("duration"),
+  features: text("features").array(),
+  isPopular: boolean("is_popular").default(false),
+});
+
+export const insertInquirySchema = createInsertSchema(inquiries).omit({
   id: true,
-  sentiment: true,
-  confidence: true,
-  isResponded: true,
+  status: true,
   createdAt: true,
 });
 
-export const insertCustomerSchema = createInsertSchema(customers).omit({
+export const insertSpiceProductSchema = createInsertSchema(spiceProducts).omit({
   id: true,
-  totalFeedback: true,
-  lastFeedbackAt: true,
-  createdAt: true,
 });
 
-export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
-export type Feedback = typeof feedback.$inferSelect;
-export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
-export type Customer = typeof customers.$inferSelect;
-export type SentimentStats = typeof sentimentStats.$inferSelect;
-
-// Add user schema that was already defined
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+export const insertTravelPackageSchema = createInsertSchema(travelPackages).omit({
+  id: true,
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertBusinessServiceSchema = createInsertSchema(businessServices).omit({
+  id: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type InsertInquiry = z.infer<typeof insertInquirySchema>;
+export type Inquiry = typeof inquiries.$inferSelect;
+export type InsertSpiceProduct = z.infer<typeof insertSpiceProductSchema>;
+export type SpiceProduct = typeof spiceProducts.$inferSelect;
+export type InsertTravelPackage = z.infer<typeof insertTravelPackageSchema>;
+export type TravelPackage = typeof travelPackages.$inferSelect;
+export type InsertBusinessService = z.infer<typeof insertBusinessServiceSchema>;
+export type BusinessService = typeof businessServices.$inferSelect;
